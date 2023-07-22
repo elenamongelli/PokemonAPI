@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ pokemon.name }}</title>
+</head>
+<body>
+    <h1>{{ pokemon.name }}</h1>
+    <img src="{{ pokemon.spriteUrl }}" alt="{{ pokemon.name }} Sprite">
+    <p>Base Experience: {{ pokemon.baseExperience }}</p>
+    <p>Height: {{ pokemon.height }}</p>
+    <p>Weight: {{ pokemon.weight }}</p>
+    <p>Order: {{ pokemon.order }}</p>
+    <p>Body Mass Index: {{ pokemon.bodyMassIndex }}</p>
+    <p>Type Slot 1: {{ pokemon.typeSlot1 }}</p>
+    <p>Type Slot 2: {{ pokemon.typeSlot2 }}</p>
+    <p>Versions:</p>
+    <ul>
+        {% for version in pokemon.versions %}
+            <li>{{ version }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('home') }}">Back to Home</a>
+</body>
+</html>
