@@ -1,8 +1,3 @@
-async function getPokemonData(url) {
-  const response = await fetch(url);
-  return response.json();
-}
-
 const calculateBMI = (weight, height) => {
   const heightInMeters = height / 10; // from decimetres to meters
   const weightInKilograms = weight / 10; // from hectograms to kilograms
@@ -16,12 +11,13 @@ const getAllPokemon = async () => {
   let currentOffset = 0;
 
   while (true) {
-    const response = await getPokemonData(url);
-    const { results } = response;
+    // Use dynamic import() to load "node-fetch" module
+    const fetch = await import('node-fetch');
+    const response = await fetch.default(url);
+    const { results } = await response.json();
     allPokemon.push(...results);
 
-    // Exit the loop when no more results are available
-    if (results.length < 100) {
+    if (results.length == 0) {
       break;
     }
 
@@ -32,10 +28,14 @@ const getAllPokemon = async () => {
   return allPokemon;
 };
 
-getAllPokemon()
-  .then(async (allPokemon) => {
+(async () => {
+  // Use dynamic import() to load "node-fetch" module
+  const fetch = await import('node-fetch').then((module) => module.default);
+
+  try {
+    const allPokemon = await getAllPokemon();
     const pokemonDataPromises = allPokemon.map((pokemon) =>
-      getPokemonData(pokemon.url)
+      fetch(pokemon.url).then((response) => response.json())
     );
 
     const pokemonDataList = await Promise.all(pokemonDataPromises);
@@ -54,11 +54,11 @@ getAllPokemon()
 
       return {
         id: pokemonData.id,
-        name: pokemonData.name.charAt(0).toUpperCase() + pokemonData.name.slice(1), // Capitalize first letter
+        name: pokemonData.name.charAt(0).toUpperCase() + pokemonData.name.slice(1),
         baseExperience: pokemonData.base_experience,
         height: pokemonData.height,
         weight: pokemonData.weight,
-        order: pokemonData.order,
+        pokedexOrder: pokemonData.order,
         bodyMassIndex: calculateBMI(pokemonData.weight, pokemonData.height),
         spriteUrl: pokemonData.sprites.front_default,
         typeSlot1: typeSlot1,
@@ -71,7 +71,7 @@ getAllPokemon()
 
     console.log('All Pokemon Data:', allPokemonData);
 
-    const fs = require('fs');
+    const fs = await import('fs').then((module) => module.default);
 
     // Save the data to a JSON file
     const jsonData = JSON.stringify(allPokemonData, null, 2);
@@ -82,7 +82,7 @@ getAllPokemon()
         console.log('Data saved to pokemon_data.json');
       }
     });
-  })
-  .catch((error) => {
+  } catch (error) {
     console.error('Error fetching Pokemon data:', error);
-  });
+  }
+})();
